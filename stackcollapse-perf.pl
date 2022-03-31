@@ -233,7 +233,7 @@ while (defined($_ = <>)) {
 				unshift @stack, "";
 			}
 		}
-                print STDERR "remember for period: $m_period\n";
+                # print STDERR "remember for period: $m_period\n";
 		remember_stack(join(";", @stack), $m_period) if @stack;
 		undef @stack;
 		undef $pname;
@@ -261,7 +261,7 @@ while (defined($_ = <>)) {
                 # xpl_accept-1 2777710 12891973.429153:          1 cycles:
 	        if (/(\S+)\s+(\d+)\s+(\d+\.\d+):\s+(\d+)\s+(\S+):.*/) {
                         $period = $4;
-                        print STDERR "found: $4\n";
+                        # print STDERR "found: $4\n";
                 }
 
                 if (/(\S+):\s*$/) {
