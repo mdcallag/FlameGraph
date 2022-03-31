@@ -197,6 +197,7 @@ my @stack;
 my $pname;
 my $m_pid;
 my $m_tid;
+my $m_period;
 
 #
 # Main loop
@@ -232,7 +233,8 @@ while (defined($_ = <>)) {
 				unshift @stack, "";
 			}
 		}
-		remember_stack(join(";", @stack), 1) if @stack;
+                print STDERR "remember for period: $m_period\n";
+		remember_stack(join(";", @stack), $m_period) if @stack;
 		undef @stack;
 		undef $pname;
 		next;
@@ -250,13 +252,19 @@ while (defined($_ = <>)) {
 		# eg, "java 12688/12764 6544038.708352: cpu-clock:"
 		# eg, "V8 WorkerThread 24636/25607 [000] 94564.109216: cycles:"
 		# other combinations possible
-		my ($comm, $pid, $tid) = ($1, $2, $3);
+		my ($comm, $pid, $tid, $period) = ($1, $2, $3, "");
 		if (not $tid) {
 			$tid = $pid;
 			$pid = "?";
 		}
 
-		if (/(\S+):\s*$/) {
+                # xpl_accept-1 2777710 12891973.429153:          1 cycles:
+	        if (/(\S+)\s+(\d+)\s+(\d+\.\d+):\s+(\d+)\s+(\S+):.*/) {
+                        $period = $4;
+                        print STDERR "found: $4\n";
+                }
+
+                if (/(\S+):\s*$/) {
 			my $event = $1;
 
 			if ($event_filter eq "") {
@@ -277,7 +285,11 @@ while (defined($_ = <>)) {
 			}
 		}
 
-		($m_pid, $m_tid) = ($pid, $tid);
+                if (not $period) {
+                        $period = 1
+                }
+                ($m_pid, $m_tid, $m_period) = ($pid, $tid, $period);
+                # ($m_pid, $m_tid) = ($pid, $tid);
 
 		if ($include_tid) {
 			$pname = "$comm-$m_pid/$m_tid";
